@@ -26,7 +26,6 @@ func (rl *RateLimiter) Allow() string {
 	tokensToAdd := elapsed.Seconds() * rl.RefillRate
 
 	rl.Tokens = min(rl.MaxTokens, rl.Tokens+tokensToAdd)
-
 	rl.LastRefill = time.Now()
 
 	if rl.Tokens >= 1 {
