@@ -12,10 +12,10 @@ type RateLimiter struct {
 	LastRefill time.Time
 }
 
-func NewRateLimiter(tokens float64, refillRate float64) *RateLimiter {
+func NewRateLimiter(maxTokens float64, refillRate float64) *RateLimiter {
 	return &RateLimiter{
-		Tokens:     tokens,
-		MaxTokens:  5,
+		Tokens:     maxTokens,
+		MaxTokens:  maxTokens,
 		RefillRate: refillRate,
 		LastRefill: time.Now(),
 	}
