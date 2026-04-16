@@ -12,6 +12,7 @@ func RateLimitHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error parsing host port %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Internal Server Error"))
+		return
 	}
 
 	userID := host

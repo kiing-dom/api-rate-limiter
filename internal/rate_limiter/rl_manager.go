@@ -18,5 +18,6 @@ func GetRateLimiter(userID string, maxTokens float64, refillRate float64) *RateL
 	log.Printf("Creating new rate limiter for user: %s", userID)
 	rl := NewRateLimiter(maxTokens, refillRate)
 	Limiters[userID] = rl
+	mu.Unlock()
 	return rl
 }
