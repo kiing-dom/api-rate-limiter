@@ -1,10 +1,12 @@
 package rate_limiter
 
 import (
+	"sync"
 	"time"
 )
 
 type RateLimiter struct {
+	mu         sync.Mutex
 	Tokens     float64 // how many requests can be made
 	MaxTokens  float64 // max bucket size (burst capacity)
 	RefillRate float64 // how many tokens come back per second
@@ -21,6 +23,8 @@ func NewRateLimiter(maxTokens float64, refillRate float64) *RateLimiter {
 }
 
 func (rl *RateLimiter) Allow() bool {
+	mu.Lock()
+	defer mu.Unlock()
 	elapsed := time.Since(rl.LastRefill)
 	tokensToAdd := elapsed.Seconds() * rl.RefillRate
 
