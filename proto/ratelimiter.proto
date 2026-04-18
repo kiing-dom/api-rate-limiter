@@ -1,0 +1,19 @@
+// ratelimiter.proto
+syntax = "proto3";
+
+package ratelimiter;
+
+option go_package = "github.com/kiing-dom/api-rate-limiter/proto";
+
+service RateLimiter {
+    rpc Check (RateLimitRequest) returns (RateLimitResponse);
+}
+
+message RateLimitRequest {
+    string user_id = 1;
+}
+
+message RateLimitResponse {
+    bool allowed = 1;
+    string message = 2;
+}
