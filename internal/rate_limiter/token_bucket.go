@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type RateLimiter struct {
+type TokenBucket struct {
 	mu         sync.Mutex
 	Tokens     float64 // how many requests can be made
 	MaxTokens  float64 // max bucket size (burst capacity)
@@ -13,8 +13,8 @@ type RateLimiter struct {
 	LastRefill time.Time
 }
 
-func NewRateLimiter(maxTokens float64, refillRate float64) *RateLimiter {
-	return &RateLimiter{
+func NewTokenBucket(maxTokens float64, refillRate float64) *TokenBucket {
+	return &TokenBucket{
 		Tokens:     maxTokens,
 		MaxTokens:  maxTokens,
 		RefillRate: refillRate,
@@ -22,9 +22,9 @@ func NewRateLimiter(maxTokens float64, refillRate float64) *RateLimiter {
 	}
 }
 
-func (rl *RateLimiter) Allow() bool {
-	mu.Lock()
-	defer mu.Unlock()
+func (rl *TokenBucket) Allow() bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
 	elapsed := time.Since(rl.LastRefill)
 	tokensToAdd := elapsed.Seconds() * rl.RefillRate
 

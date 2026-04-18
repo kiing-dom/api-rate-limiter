@@ -4,11 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kiing-dom/api-rate-limiter/internal/rate_limiter"
+	"github.com/kiing-dom/api-rate-limiter/handler"
+	"github.com/kiing-dom/api-rate-limiter/store"
 )
 
 func main() {
-	http.HandleFunc("/", rate_limiter.RateLimitHandler)
+	store := store.NewStore()
+	h := handler.RateLimitHandler(store)
+	http.HandleFunc("/", h)
 
 	err := http.ListenAndServe(":8081", nil)
 	if err != nil {
