@@ -5,11 +5,16 @@ import (
 	"net/http"
 
 	"github.com/kiing-dom/api-rate-limiter/handler"
+	"github.com/kiing-dom/api-rate-limiter/internal/server"
 	"github.com/kiing-dom/api-rate-limiter/store"
 )
 
 func main() {
 	store := store.NewStore()
+	// gRPC
+	go server.StartGRPCServer(store)
+
+	// http
 	h := handler.RateLimitHandler(store)
 	http.HandleFunc("/", h)
 
