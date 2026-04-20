@@ -24,7 +24,7 @@ func (s *Store) GetRateLimiter(userID string) rate_limiter.RateLimiter {
 
 	rl, exists := s.RateLimiters[userID]
 	if !exists {
-		rl = rate_limiter.NewFixedWindow(5, time.Minute*2)
+		rl = rate_limiter.NewSlidingWindow(3, time.Second*10)
 		s.RateLimiters[userID] = rl
 	}
 
