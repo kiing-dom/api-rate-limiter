@@ -1,0 +1,3 @@
+- add sliding window algorithm
+- handle persistence
+- metadata (e.g. api keys)
