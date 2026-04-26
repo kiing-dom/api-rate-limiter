@@ -1,32 +1,27 @@
 package store
 
 import (
-	"sync"
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/kiing-dom/api-rate-limiter/internal/rate_limiter"
+	"github.com/redis/go-redis/v9"
 )
 
 type Store struct {
-	mu           sync.Mutex
-	RateLimiters map[string]rate_limiter.RateLimiter
+	client *redis.Client
 }
 
-func NewStore() *Store {
-	return &Store{
-		RateLimiters: make(map[string]rate_limiter.RateLimiter),
+func NewStore(newAddr string) (*Store, error) {
+	client := NewRedisClient(newAddr)
+	if err := Ping(context.Background(), client); err != nil {
+		return nil, fmt.Errorf("Redis connection failed: %w", err)
 	}
+
+	return &Store{client: client}, nil
 }
 
 func (s *Store) GetRateLimiter(userID string) rate_limiter.RateLimiter {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	rl, exists := s.RateLimiters[userID]
-	if !exists {
-		rl = rate_limiter.NewSlidingWindow(3, time.Second*10)
-		s.RateLimiters[userID] = rl
-	}
-
-	return rl
+	return rate_limiter.NewTokenBucket(s.client, 3, time.Minute.Seconds()*2)
 }

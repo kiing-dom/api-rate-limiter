@@ -1,15 +1,18 @@
 package rate_limiter
 
-import "time"
+import (
+	"github.com/redis/go-redis/v9"
+)
 
-func NewRateLimiter(algo string) RateLimiter {
+func NewRateLimiter(algo string, client *redis.Client) RateLimiter {
 	switch algo {
 	case "token":
-		return NewTokenBucket(5, 1)
+		return NewTokenBucket(client, 5, 1)
 	case "fixed":
-		return NewFixedWindow(5, time.Minute*2)
+		// return NewFixedWindow(5, time.Minute*2)
 	// add sliding window when implemented
 	default:
 		panic("unknown algorithm provided")
 	}
+	return nil
 }
