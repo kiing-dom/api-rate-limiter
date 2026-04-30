@@ -11,8 +11,9 @@ import (
 
 type TokenBucket struct {
 	Client     *redis.Client
-	MaxTokens  float64 // max bucket size (burst capacity)
-	RefillRate float64 // how many tokens come back per second
+	MaxTokens  float64          // max bucket size (burst capacity)
+	RefillRate float64          // how many tokens come back per second
+	Now        func() time.Time // default to time.Now()
 }
 
 func NewTokenBucket(client *redis.Client, maxTokens float64, refillRate float64) *TokenBucket {
@@ -20,6 +21,7 @@ func NewTokenBucket(client *redis.Client, maxTokens float64, refillRate float64)
 		Client:     client,
 		MaxTokens:  maxTokens,
 		RefillRate: refillRate,
+		Now:        time.Now,
 	}
 }
 
@@ -29,7 +31,7 @@ func (rl *TokenBucket) Allow(userID string) bool {
 	// create key (using userID)
 	key := fmt.Sprintf("ratelimit:token:%s", userID)
 	// get time
-	now := time.Now()
+	now := rl.Now()
 
 	// get values from redis (err if no value)
 	vals, err := rl.Client.HMGet(ctx, key, "tokens", "last_refill").Result()
