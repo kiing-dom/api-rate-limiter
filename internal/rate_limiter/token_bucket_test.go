@@ -43,17 +43,19 @@ func TestRedisTokenBucket_AllowsWithinLimit(t *testing.T) {
 	}
 }
 
-// func TestTokenBucket_RejectsOverLimit(t *testing.T) {
-// 	rl := NewTokenBucket(5, 1)
+func TestTokenBucket_RejectsOverLimit(t *testing.T) {
+	db, mock := redismock.NewClientMock()
 
-// 	for range 5 {
-// 		rl.Allow()
-// 	}
+	userID := "user:cde456"
+	key := fmt.Sprintf("ratelimit:token:%s", userID)
+	maxTokens := 1
 
-// 	if rl.Allow() {
-// 		t.Fatal("Expected request to be rejected!")
-// 	}
-// }
+	fixedTime := time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC)
+
+	rl := NewTokenBucket(db, float64(maxTokens), 1)
+	rl.Now = func() time.Time { return fixedTime }
+
+}
 
 // func TestTokenBucket_RefillsOverTime(t *testing.T) {
 // 	rl := NewTokenBucket(1, 1)
