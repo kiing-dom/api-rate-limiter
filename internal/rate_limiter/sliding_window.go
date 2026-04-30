@@ -1,49 +1,48 @@
 package rate_limiter
 
 import (
-	"sync"
+	"context"
+	"fmt"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type SlidingWindow struct {
-	mu         sync.Mutex
-	timestamps []time.Time
-	window     time.Duration
-	limit      int
+	Client *redis.Client
+	UserID string
+	Limit  int
+	Window time.Duration
 }
 
-func NewSlidingWindow(limit int, window time.Duration) *SlidingWindow {
+func NewSlidingWindow(client *redis.Client, userID string, limit int, window time.Duration) *SlidingWindow {
 	return &SlidingWindow{
-		timestamps: []time.Time{},
-		window:     window,
-		limit:      limit,
+		Client: client,
+		UserID: userID,
+		Limit:  limit,
+		Window: window,
 	}
 }
 
-func (rl *SlidingWindow) Allow() bool {
-	rl.mu.Lock()
-	defer rl.mu.Unlock()
-
+func (rl *SlidingWindow) Allow(userID string) bool {
+	ctx := context.Background()
 	now := time.Now()
-	cutoff := now.Add(-rl.window)
+	key := fmt.Sprintf("ratelimit:sliding:%s", userID)
+	cutoff := fmt.Sprintf("%d", now.Add(-rl.Window).UnixNano())
 
-	// remove the old timestamps
-	var valid []time.Time
-	for _, t := range rl.timestamps {
-		if t.After(cutoff) {
-			valid = append(valid, t)
-		}
-	}
-
-	rl.timestamps = valid
-
-	// check limit
-	if len(rl.timestamps) > rl.limit {
+	pipe := rl.Client.TxPipeline()
+	pipe.ZRemRangeByScore(ctx, key, "0", cutoff)
+	countCmd := pipe.ZCard(ctx, key)
+	if _, err := pipe.Exec(ctx); err != nil {
 		return false
 	}
 
-	// do current request
-	rl.timestamps = append(rl.timestamps, now)
+	if countCmd.Val() >= int64(rl.Limit) {
+		return false
+	}
 
+	nano := now.Unix()
+	rl.Client.ZAdd(ctx, key, redis.Z{Score: float64(nano), Member: nano})
+	rl.Client.Expire(ctx, key, rl.Window)
 	return true
 }
