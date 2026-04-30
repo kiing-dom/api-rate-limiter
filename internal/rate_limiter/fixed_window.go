@@ -1,41 +1,42 @@
 package rate_limiter
 
 import (
-	"sync"
+	"context"
+	"fmt"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type FixedWindow struct {
-	mu          sync.Mutex
-	Count       int
-	Limit       int
-	Window      time.Duration
-	WindowStart time.Time
+	Client *redis.Client
+	Limit  int
+	Window time.Duration
+	UserID string
 }
 
-func NewFixedWindow(limit int, window time.Duration) *FixedWindow {
+func NewFixedWindow(client *redis.Client, userID string, limit int, window time.Duration) *FixedWindow {
 	return &FixedWindow{
-		Limit:       limit,
-		Window:      window,
-		WindowStart: time.Now(),
+		Client: client,
+		UserID: userID,
+		Limit:  limit,
+		Window: window,
 	}
 }
 
-func (rl *FixedWindow) Allow() bool {
-	rl.mu.Lock()
-	defer rl.mu.Unlock()
+func (rl *FixedWindow) Allow(userID string) bool {
+	ctx := context.Background()
+	windowSlot := time.Now().Truncate(rl.Window).Unix()
+	key := fmt.Sprintf("ratelimit:fixed:%s:%d", userID, windowSlot)
 
-	now := time.Now()
-
-	if now.Sub(rl.WindowStart) > rl.Window {
-		rl.WindowStart = now
-		rl.Count = 0
+	count, err := rl.Client.Incr(ctx, key).Result()
+	if err != nil {
+		return false
 	}
 
-	if rl.Count < rl.Limit {
-		rl.Count++
-		return true
+	if count == 1 {
+		rl.Client.Expire(ctx, key, rl.Window)
 	}
 
-	return false
+	return count <= int64(rl.Limit)
 }
