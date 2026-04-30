@@ -77,7 +77,7 @@ func TestTokenBucket_RefillsOverTime(t *testing.T) {
 	maxTokens := 1
 
 	fixedTime := time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC)
-	pastTime := fixedTime.Add(2 * time.Second)
+	pastTime := fixedTime.Add(-2 * time.Second)
 
 	rl := NewTokenBucket(db, float64(maxTokens), 1)
 	rl.Now = func() time.Time { return fixedTime }

@@ -13,6 +13,7 @@ type FixedWindow struct {
 	Limit  int
 	Window time.Duration
 	UserID string
+	Now    func() time.Time
 }
 
 func NewFixedWindow(client *redis.Client, userID string, limit int, window time.Duration) *FixedWindow {
@@ -21,12 +22,13 @@ func NewFixedWindow(client *redis.Client, userID string, limit int, window time.
 		UserID: userID,
 		Limit:  limit,
 		Window: window,
+		Now:    time.Now,
 	}
 }
 
 func (rl *FixedWindow) Allow(userID string) bool {
 	ctx := context.Background()
-	windowSlot := time.Now().Truncate(rl.Window).Unix()
+	windowSlot := rl.Now().Truncate(rl.Window).Unix()
 	key := fmt.Sprintf("ratelimit:fixed:%s:%d", userID, windowSlot)
 
 	count, err := rl.Client.Incr(ctx, key).Result()
