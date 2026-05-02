@@ -28,7 +28,7 @@ func NewSlidingWindow(client *redis.Client, userID string, limit int, window tim
 
 func (rl *SlidingWindow) Allow(userID string) bool {
 	ctx := context.Background()
-	now := time.Now()
+	now := rl.Now()
 	key := fmt.Sprintf("ratelimit:sliding:%s", userID)
 	cutoff := fmt.Sprintf("%d", now.Add(-rl.Window).UnixNano())
 
