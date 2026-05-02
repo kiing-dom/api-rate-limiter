@@ -13,6 +13,7 @@ type SlidingWindow struct {
 	UserID string
 	Limit  int
 	Window time.Duration
+	Now    func() time.Time
 }
 
 func NewSlidingWindow(client *redis.Client, userID string, limit int, window time.Duration) *SlidingWindow {
@@ -21,6 +22,7 @@ func NewSlidingWindow(client *redis.Client, userID string, limit int, window tim
 		UserID: userID,
 		Limit:  limit,
 		Window: window,
+		Now:    time.Now,
 	}
 }
 
