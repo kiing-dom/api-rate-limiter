@@ -48,5 +48,27 @@ func TestSlidingWindow_AllowsWithinLimit(t *testing.T) {
 }
 
 func TestSlidingWindow_RejectsOverLimit(t *testing.T) {
+	db, mock := redismock.NewClientMock()
+	fixedTime := time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC)
+	window := 2 * time.Minute
+	userID := "user:abc123"
+	key := fmt.Sprintf("ratelimit:sliding:%s", userID)
+	cutoff := fmt.Sprintf("%d", fixedTime.Add(-window).UnixNano())
 
+	limit := 3
+	rl := NewSlidingWindow(db, userID, limit, window)
+	rl.Now = func() time.Time { return fixedTime }
+
+	mock.ExpectTxPipeline()
+	mock.ExpectZRemRangeByScore(key, "0", cutoff).SetVal(0)
+	mock.ExpectZCard(key).SetVal(int64(limit))
+	mock.ExpectTxPipelineExec()
+
+	if rl.Allow(userID) {
+		t.Fatal("Expected request to be rejected as it's over the limit")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
 }
