@@ -39,3 +39,26 @@ func TestFixedWindow_AllowsWithinLimit(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFixedWindow_RejectsOverLimit(t *testing.T) {
+	db, mock := redismock.NewClientMock()
+	fixedTime := time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC)
+	window := 2 * time.Minute
+	userID := "user:abc123"
+	windowSlot := fixedTime.Truncate(window).Unix()
+	key := fmt.Sprintf("ratelimit:fixed:%s:%d", userID, windowSlot)
+
+	limit := 3
+	rl := NewFixedWindow(db, userID, limit, window)
+	rl.Now = func() time.Time { return fixedTime }
+
+	mock.ExpectIncr(key).SetVal(int64(limit + 1))
+
+	if rl.Allow(userID) {
+		t.Fatal("Expected request to be rejected because over limit")
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
