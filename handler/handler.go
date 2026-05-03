@@ -18,9 +18,13 @@ func RateLimitHandler(s *store.Store) http.HandlerFunc {
 			return
 		}
 
-		userID := host
-		rl := s.GetRateLimiter(userID)
+		algo := r.URL.Query().Get("algo")
+		if algo == "" {
+			algo = "token"
+		}
+		rl := s.GetRateLimiter(algo)
 
+		userID := host
 		if !rl.Allow(userID) {
 			log.Printf("Too Many Request by user: %s. Try again later", userID)
 			w.WriteHeader(http.StatusTooManyRequests)
