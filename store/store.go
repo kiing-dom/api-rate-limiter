@@ -13,6 +13,10 @@ type Store struct {
 	client *redis.Client
 }
 
+type RLStore interface {
+	GetRateLimiter(algo string) rate_limiter.RateLimiter
+}
+
 func NewStore(newAddr string) (*Store, error) {
 	client := NewRedisClient(newAddr)
 	if err := Ping(context.Background(), client); err != nil {
