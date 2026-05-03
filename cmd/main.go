@@ -11,7 +11,10 @@ import (
 
 func main() {
 	redisAddr := "localhost:6379"
-	store, _ := store.NewStore(redisAddr)
+	store, err := store.NewStore(redisAddr)
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
 	// gRPC
 	go server.StartGRPCServer(store)
 
@@ -19,7 +22,7 @@ func main() {
 	h := handler.RateLimitHandler(store)
 	http.HandleFunc("/", h)
 
-	err := http.ListenAndServe(":8081", nil)
+	err = http.ListenAndServe(":8081", nil)
 	if err != nil {
 		log.Fatalf("Server failed to run %v", err)
 	}
