@@ -1,0 +1,28 @@
+package handler
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/kiing-dom/api-rate-limiter/internal/rate_limiter"
+)
+
+type mockStore struct{ allowed bool }
+type mockLimiter struct{ allowed bool }
+
+func (m *mockLimiter) Allow(_ string) bool { return m.allowed }
+func (m *mockStore) GetRateLimiter(_ string) rate_limiter.RateLimiter {
+	return &mockLimiter{allowed: m.allowed}
+}
+func TestHTTPHandler_Allows(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "127.0.0.1:1234"
+	w := httptest.NewRecorder()
+
+	RateLimitHandler(&mockStore{allowed: true}).ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, but got %d", w.Code)
+	}
+}
