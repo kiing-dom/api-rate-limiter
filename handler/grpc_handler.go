@@ -9,10 +9,10 @@ import (
 
 type GRPCRateLimiterServer struct {
 	pb.UnimplementedRateLimiterServer
-	store *store.Store
+	store store.RLStore
 }
 
-func NewGRPCServer(s *store.Store) *GRPCRateLimiterServer {
+func NewGRPCServer(s store.RLStore) *GRPCRateLimiterServer {
 	return &GRPCRateLimiterServer{store: s}
 }
 
