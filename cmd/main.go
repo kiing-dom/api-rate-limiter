@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	store := store.NewStore()
+	redisAddr := "localhost:6379"
+	store, _ := store.NewStore(redisAddr)
 	// gRPC
 	go server.StartGRPCServer(store)
 

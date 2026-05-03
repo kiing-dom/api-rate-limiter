@@ -12,7 +12,7 @@ import (
 func BenchmarkSlidingWindow(b *testing.B) {
 	db, _ := redismock.NewClientMock()
 	userID := "user:abc123"
-	rl := NewSlidingWindow(db, userID, 10, time.Second*2)
+	rl := NewSlidingWindow(db, 10, time.Second*2)
 	for i := 0; b.Loop(); i++ {
 		rl.Allow(userID)
 	}
@@ -28,7 +28,7 @@ func TestSlidingWindow_AllowsWithinLimit(t *testing.T) {
 	nano := fixedTime.Unix()
 
 	limit := 3
-	rl := NewSlidingWindow(db, userID, limit, window)
+	rl := NewSlidingWindow(db, limit, window)
 	rl.Now = func() time.Time { return fixedTime }
 
 	mock.ExpectTxPipeline()
@@ -56,7 +56,7 @@ func TestSlidingWindow_RejectsOverLimit(t *testing.T) {
 	cutoff := fmt.Sprintf("%d", fixedTime.Add(-window).UnixNano())
 
 	limit := 3
-	rl := NewSlidingWindow(db, userID, limit, window)
+	rl := NewSlidingWindow(db, limit, window)
 	rl.Now = func() time.Time { return fixedTime }
 
 	mock.ExpectTxPipeline()

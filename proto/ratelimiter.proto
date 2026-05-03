@@ -11,6 +11,7 @@ service RateLimiter {
 
 message RateLimitRequest {
     string user_id = 1;
+    string algo = 2;
 }
 
 message RateLimitResponse {

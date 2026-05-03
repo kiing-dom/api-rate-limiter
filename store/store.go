@@ -22,6 +22,15 @@ func NewStore(newAddr string) (*Store, error) {
 	return &Store{client: client}, nil
 }
 
-func (s *Store) GetRateLimiter(userID string) rate_limiter.RateLimiter {
-	return rate_limiter.NewTokenBucket(s.client, 3, time.Minute.Seconds()*2)
+func (s *Store) GetRateLimiter(algo string) rate_limiter.RateLimiter {
+	switch algo {
+	case "sliding":
+		return rate_limiter.NewSlidingWindow(s.client, 3, 2*time.Minute)
+	case "fixed":
+		return rate_limiter.NewFixedWindow(s.client, 3, 2*time.Minute)
+	case "token":
+		return rate_limiter.NewTokenBucket(s.client, 3, 1)
+	default:
+		return rate_limiter.NewTokenBucket(s.client, 3, 1)
+	}
 }

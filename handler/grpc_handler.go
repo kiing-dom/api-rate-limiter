@@ -21,11 +21,9 @@ func (g *GRPCRateLimiterServer) Check(
 	req *pb.RateLimitRequest,
 ) (*pb.RateLimitResponse, error) {
 
-	userID := req.GetUserId()
+	rl := g.store.GetRateLimiter(req.GetAlgo())
 
-	rl := g.store.GetRateLimiter(userID)
-
-	if !rl.Allow() {
+	if !rl.Allow(req.GetUserId()) {
 		return &pb.RateLimitResponse{
 			Allowed: false,
 			Message: "Rate limited exceeded",

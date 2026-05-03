@@ -26,6 +26,7 @@ const (
 type RateLimitRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Algo          string                 `protobuf:"bytes,2,opt,name=algo,proto3" json:"algo,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,6 +64,13 @@ func (*RateLimitRequest) Descriptor() ([]byte, []int) {
 func (x *RateLimitRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *RateLimitRequest) GetAlgo() string {
+	if x != nil {
+		return x.Algo
 	}
 	return ""
 }
@@ -123,9 +131,10 @@ var File_proto_ratelimiter_proto protoreflect.FileDescriptor
 
 const file_proto_ratelimiter_proto_rawDesc = "" +
 	"\n" +
-	"\x17proto/ratelimiter.proto\x12\vratelimiter\"+\n" +
+	"\x17proto/ratelimiter.proto\x12\vratelimiter\"?\n" +
 	"\x10RateLimitRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"G\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04algo\x18\x02 \x01(\tR\x04algo\"G\n" +
 	"\x11RateLimitResponse\x12\x18\n" +
 	"\aallowed\x18\x01 \x01(\bR\aallowed\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage2U\n" +

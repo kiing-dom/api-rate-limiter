@@ -10,16 +10,14 @@ import (
 
 type SlidingWindow struct {
 	Client *redis.Client
-	UserID string
 	Limit  int
 	Window time.Duration
 	Now    func() time.Time
 }
 
-func NewSlidingWindow(client *redis.Client, userID string, limit int, window time.Duration) *SlidingWindow {
+func NewSlidingWindow(client *redis.Client, limit int, window time.Duration) *SlidingWindow {
 	return &SlidingWindow{
 		Client: client,
-		UserID: userID,
 		Limit:  limit,
 		Window: window,
 		Now:    time.Now,

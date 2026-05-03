@@ -12,14 +12,12 @@ type FixedWindow struct {
 	Client *redis.Client
 	Limit  int
 	Window time.Duration
-	UserID string
 	Now    func() time.Time
 }
 
-func NewFixedWindow(client *redis.Client, userID string, limit int, window time.Duration) *FixedWindow {
+func NewFixedWindow(client *redis.Client, limit int, window time.Duration) *FixedWindow {
 	return &FixedWindow{
 		Client: client,
-		UserID: userID,
 		Limit:  limit,
 		Window: window,
 		Now:    time.Now,

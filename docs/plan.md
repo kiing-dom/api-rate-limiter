@@ -2,9 +2,9 @@
 [X] handle persistence (redis)
 [X] writing test cases
 
-[ ] update GetRateLimiter, etc to match new design
-[ ] update factory.go
-[ ] update main.go
+[X] update GetRateLimiter, etc to match new design
+[X] update factory.go (*actually removed since no longer necessary*)
+[X] update main.go
 [ ] tests for handlers
 [ ] config rate limiters via env variables e.g. redis addr, limits, window sizes, etc.
 

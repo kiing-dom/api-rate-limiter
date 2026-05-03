@@ -21,7 +21,7 @@ func RateLimitHandler(s *store.Store) http.HandlerFunc {
 		userID := host
 		rl := s.GetRateLimiter(userID)
 
-		if !rl.Allow() {
+		if !rl.Allow(userID) {
 			log.Printf("Too Many Request by user: %s. Try again later", userID)
 			w.WriteHeader(http.StatusTooManyRequests)
 			w.Write([]byte("Rate limit exceeded"))

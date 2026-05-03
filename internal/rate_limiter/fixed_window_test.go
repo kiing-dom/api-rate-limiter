@@ -11,7 +11,7 @@ import (
 func BenchmarkFixedWindow(b *testing.B) {
 	db, _ := redismock.NewClientMock()
 	userID := "user:abc123"
-	rl := NewFixedWindow(db, userID, 10, time.Second*2)
+	rl := NewFixedWindow(db, 10, time.Second*2)
 	for i := 0; b.Loop(); i++ {
 		rl.Allow(userID)
 	}
@@ -25,7 +25,7 @@ func TestFixedWindow_AllowsWithinLimit(t *testing.T) {
 	windowSlot := fixedTime.Truncate(window).Unix()
 	key := fmt.Sprintf("ratelimit:fixed:%s:%d", userID, windowSlot)
 
-	rl := NewFixedWindow(db, userID, 3, window)
+	rl := NewFixedWindow(db, 4, window)
 	rl.Now = func() time.Time { return fixedTime }
 
 	mock.ExpectIncr(key).SetVal(1)
@@ -49,7 +49,7 @@ func TestFixedWindow_RejectsOverLimit(t *testing.T) {
 	key := fmt.Sprintf("ratelimit:fixed:%s:%d", userID, windowSlot)
 
 	limit := 3
-	rl := NewFixedWindow(db, userID, limit, window)
+	rl := NewFixedWindow(db, limit, window)
 	rl.Now = func() time.Time { return fixedTime }
 
 	mock.ExpectIncr(key).SetVal(int64(limit + 1))
