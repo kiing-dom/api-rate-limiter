@@ -10,5 +10,6 @@ type Config struct {
 	GRPCPort   string
 	RateLimit  int
 	Window     time.Duration
+	MaxTokens  float64
 	RefillRate float64
 }
