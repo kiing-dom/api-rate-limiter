@@ -16,18 +16,18 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	store, err := store.NewStore(cfg.RedisAddr)
+	store, err := store.NewStore(cfg.RedisAddr, cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
 	// gRPC
-	go server.StartGRPCServer(store)
+	go server.StartGRPCServer(store, cfg)
 
 	// http
 	h := handler.RateLimitHandler(store)
 	http.HandleFunc("/", h)
 
-	err = http.ListenAndServe(":8081", nil)
+	err = http.ListenAndServe(":"+cfg.HTTPPort, nil)
 	if err != nil {
 		log.Fatalf("Server failed to run %v", err)
 	}

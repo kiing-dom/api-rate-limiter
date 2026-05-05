@@ -6,12 +6,8 @@
 [X] update factory.go (*actually removed since no longer necessary*)
 [X] update main.go
 [X] tests for handlers
-[ ] config rate limiters via env variables e.g. redis addr, limits, window sizes, etc.
+[X] config rate limiters via env variables e.g. redis addr, limits, window sizes, etc.
 
 ### API
 [ ] choose algorithm via api
-
-
-
-
-- metadata (e.g. api keys)
+    - metadata (e.g. api keys)
