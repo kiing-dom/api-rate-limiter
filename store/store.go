@@ -5,25 +5,27 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kiing-dom/api-rate-limiter/internal/config"
 	"github.com/kiing-dom/api-rate-limiter/internal/rate_limiter"
 	"github.com/redis/go-redis/v9"
 )
 
 type Store struct {
 	client *redis.Client
+	cfg    *config.Config
 }
 
 type RLStore interface {
 	GetRateLimiter(algo string) rate_limiter.RateLimiter
 }
 
-func NewStore(newAddr string) (*Store, error) {
+func NewStore(newAddr string, cfg *config.Config) (*Store, error) {
 	client := NewRedisClient(newAddr)
 	if err := Ping(context.Background(), client); err != nil {
 		return nil, fmt.Errorf("Redis connection failed: %w", err)
 	}
 
-	return &Store{client: client}, nil
+	return &Store{client: client, cfg: cfg}, nil
 }
 
 func (s *Store) GetRateLimiter(algo string) rate_limiter.RateLimiter {

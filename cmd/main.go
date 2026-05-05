@@ -5,13 +5,18 @@ import (
 	"net/http"
 
 	"github.com/kiing-dom/api-rate-limiter/handler"
+	"github.com/kiing-dom/api-rate-limiter/internal/config"
 	"github.com/kiing-dom/api-rate-limiter/internal/server"
 	"github.com/kiing-dom/api-rate-limiter/store"
 )
 
 func main() {
-	redisAddr := "localhost:6379"
-	store, err := store.NewStore(redisAddr)
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	store, err := store.NewStore(cfg.RedisAddr)
 	if err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
