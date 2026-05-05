@@ -26,3 +26,15 @@ func TestHTTPHandler_Allows(t *testing.T) {
 		t.Fatalf("expected 200 OK, but got %d", w.Code)
 	}
 }
+
+func TestHTTPHandler_Rejects(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.RemoteAddr = "127.0.0.1:1234"
+	w := httptest.NewRecorder()
+
+	RateLimitHandler(&mockStore{allowed: false}).ServeHTTP(w, req)
+
+	if w.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected 429 Too Many Requests, but got %d", w.Code)
+	}
+}
