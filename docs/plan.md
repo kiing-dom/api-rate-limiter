@@ -5,7 +5,7 @@
 [X] update GetRateLimiter, etc to match new design
 [X] update factory.go (*actually removed since no longer necessary*)
 [X] update main.go
-[ ] tests for handlers
+[X] tests for handlers
 [ ] config rate limiters via env variables e.g. redis addr, limits, window sizes, etc.
 
 ### API
