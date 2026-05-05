@@ -31,12 +31,12 @@ func NewStore(newAddr string, cfg *config.Config) (*Store, error) {
 func (s *Store) GetRateLimiter(algo string) rate_limiter.RateLimiter {
 	switch algo {
 	case "sliding":
-		return rate_limiter.NewSlidingWindow(s.client, 3, 2*time.Minute)
+		return rate_limiter.NewSlidingWindow(s.client, s.cfg.RateLimit, s.cfg.Window)
 	case "fixed":
-		return rate_limiter.NewFixedWindow(s.client, 3, 2*time.Minute)
+		return rate_limiter.NewFixedWindow(s.client, s.cfg.RateLimit, s.cfg.Window)
 	case "token":
-		return rate_limiter.NewTokenBucket(s.client, 3, 1)
+		return rate_limiter.NewTokenBucket(s.client, s.cfg.MaxTokens, s.cfg.RefillRate)
 	default:
-		return rate_limiter.NewTokenBucket(s.client, 3, 1)
+		return rate_limiter.NewTokenBucket(s.client, s.cfg.MaxTokens, s.cfg.RefillRate)
 	}
 }
