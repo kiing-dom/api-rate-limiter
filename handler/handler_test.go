@@ -17,7 +17,7 @@ func (m *mockStore) GetRateLimiter(_ string) rate_limiter.RateLimiter {
 }
 func TestHTTPHandler_Allows(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.RemoteAddr = "127.0.0.1:1234"
+	req.Header.Set("X-API-KEY", "test-key")
 	w := httptest.NewRecorder()
 
 	RateLimitHandler(&mockStore{allowed: true}).ServeHTTP(w, req)
@@ -29,7 +29,7 @@ func TestHTTPHandler_Allows(t *testing.T) {
 
 func TestHTTPHandler_Rejects(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.RemoteAddr = "127.0.0.1:1234"
+	req.Header.Set("X-API-KEY", "test-key")
 	w := httptest.NewRecorder()
 
 	RateLimitHandler(&mockStore{allowed: false}).ServeHTTP(w, req)
