@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	RedisAddr  string
-	HTTPPort   string
-	GRPCPort   string
-	RateLimit  int
-	Window     time.Duration
-	MaxTokens  float64
-	RefillRate float64
+	RedisAddr   string
+	HTTPPort    string
+	GRPCPort    string
+	DefaultAlgo string
+	RateLimit   int
+	Window      time.Duration
+	MaxTokens   float64
+	RefillRate  float64
 }
 
 func Load() (*Config, error) {
@@ -27,13 +28,14 @@ func Load() (*Config, error) {
 	refillRate, _ := strconv.ParseFloat(getEnv("REFILL_RATE", "1.0"), 64)
 
 	return &Config{
-		RedisAddr:  getEnv("REDIS_ADDR", "localhost:6379"),
-		HTTPPort:   getEnv("HTTP_PORT", "8081"),
-		GRPCPort:   getEnv("GRPC_PORT", "50051"),
-		RateLimit:  rateLimit,
-		Window:     time.Duration(windowSecs) * time.Second,
-		MaxTokens:  maxTokens,
-		RefillRate: refillRate,
+		RedisAddr:   getEnv("REDIS_ADDR", "localhost:6379"),
+		HTTPPort:    getEnv("HTTP_PORT", "8081"),
+		GRPCPort:    getEnv("GRPC_PORT", "50051"),
+		DefaultAlgo: getEnv("ALGO", "token"),
+		RateLimit:   rateLimit,
+		Window:      time.Duration(windowSecs) * time.Second,
+		MaxTokens:   maxTokens,
+		RefillRate:  refillRate,
 	}, nil
 }
 

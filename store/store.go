@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/kiing-dom/api-rate-limiter/internal/config"
 	"github.com/kiing-dom/api-rate-limiter/internal/rate_limiter"
@@ -37,6 +36,10 @@ func (s *Store) GetRateLimiter(algo string) rate_limiter.RateLimiter {
 	case "token":
 		return rate_limiter.NewTokenBucket(s.client, s.cfg.MaxTokens, s.cfg.RefillRate)
 	default:
+		if algo != s.cfg.DefaultAlgo {
+			return s.GetRateLimiter(s.cfg.DefaultAlgo)
+		}
+
 		return rate_limiter.NewTokenBucket(s.client, s.cfg.MaxTokens, s.cfg.RefillRate)
 	}
 }
