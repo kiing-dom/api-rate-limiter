@@ -38,3 +38,14 @@ func TestHTTPHandler_Rejects(t *testing.T) {
 		t.Fatalf("expected 429 Too Many Requests, but got %d", w.Code)
 	}
 }
+
+func TestHTTPHandler_MissingAPIKey(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	RateLimitHandler(&mockStore{allowed: true}).ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("Expected error 401 because of missing API key but got %d", w.Code)
+	}
+}
