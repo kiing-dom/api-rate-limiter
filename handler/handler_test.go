@@ -6,14 +6,18 @@ import (
 	"testing"
 
 	"github.com/kiing-dom/api-rate-limiter/internal/rate_limiter"
+	"github.com/kiing-dom/api-rate-limiter/store"
 )
 
 type mockStore struct{ allowed bool }
 type mockLimiter struct{ allowed bool }
 
 func (m *mockLimiter) Allow(_ string) bool { return m.allowed }
-func (m *mockStore) GetRateLimiter(_ string) rate_limiter.RateLimiter {
+func (m *mockStore) GetRateLimiter(_ string, _ string) rate_limiter.RateLimiter {
 	return &mockLimiter{allowed: m.allowed}
+}
+func (m *mockStore) SetKeyConfig(_ string, _ store.KeyConfig) error {
+	return nil
 }
 func TestHTTPHandler_Allows(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
