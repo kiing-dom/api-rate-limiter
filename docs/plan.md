@@ -9,5 +9,10 @@
 [X] config rate limiters via env variables e.g. redis addr, limits, window sizes, etc.
 
 ### API
-[ ] choose algorithm via api
-    - metadata (e.g. api keys)
+[X] choose algorithm via api
+   [x] - metadata (e.g. api keys) *IN PROGRESS*
+   [ ] - make a /config endpoint handler that will:
+    - read X-API-KEY to determine user
+    - decode the json body
+    - validate the algorithm
+    - call the KeyConfig
