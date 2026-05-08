@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"encoding/json"
 
@@ -25,7 +26,8 @@ type KeyConfig struct {
 }
 
 type RLStore interface {
-	GetRateLimiter(algo string) rate_limiter.RateLimiter
+	GetRateLimiter(userID, algo string) rate_limiter.RateLimiter
+	SetKeyConfig(userID string, cfg KeyConfig) error
 }
 
 func NewStore(newAddr string, cfg *config.Config) (*Store, error) {
@@ -37,21 +39,13 @@ func NewStore(newAddr string, cfg *config.Config) (*Store, error) {
 	return &Store{client: client, cfg: cfg}, nil
 }
 
-func (s *Store) GetRateLimiter(algo string) rate_limiter.RateLimiter {
-	switch algo {
-	case "sliding":
-		return rate_limiter.NewSlidingWindow(s.client, s.cfg.RateLimit, s.cfg.Window)
-	case "fixed":
-		return rate_limiter.NewFixedWindow(s.client, s.cfg.RateLimit, s.cfg.Window)
-	case "token":
-		return rate_limiter.NewTokenBucket(s.client, s.cfg.MaxTokens, s.cfg.RefillRate)
-	default:
-		if algo != s.cfg.DefaultAlgo {
-			return s.GetRateLimiter(s.cfg.DefaultAlgo)
-		}
-
-		return rate_limiter.NewTokenBucket(s.client, s.cfg.MaxTokens, s.cfg.RefillRate)
+func (s *Store) GetRateLimiter(userID, algo string) rate_limiter.RateLimiter {
+	keyCfg, err := s.GetKeyConfig(userID)
+	if err == nil {
+		return s.buildLimiter(keyCfg.Algo, keyCfg.RateLimit, time.Duration(keyCfg.WindowSecs), keyCfg.MaxTokens, keyCfg.RefillRate)
 	}
+
+	return s.buildLimiter(algo, s.cfg.RateLimit, s.cfg.Window, s.cfg.MaxTokens, s.cfg.RefillRate)
 }
 
 func (s *Store) SetKeyConfig(userID string, cfg KeyConfig) error {
@@ -74,4 +68,21 @@ func (s *Store) GetKeyConfig(userID string) (*KeyConfig, error) {
 	}
 
 	return &cfg, nil
+}
+
+func (s *Store) buildLimiter(algo string, rateLimit int, window time.Duration, maxTokens float64, refillRate float64) rate_limiter.RateLimiter {
+	switch algo {
+	case "sliding":
+		return rate_limiter.NewSlidingWindow(s.client, rateLimit, window)
+	case "fixed":
+		return rate_limiter.NewFixedWindow(s.client, rateLimit, window)
+	case "token":
+		return rate_limiter.NewTokenBucket(s.client, maxTokens, refillRate)
+	default:
+		if algo != s.cfg.DefaultAlgo {
+			return s.buildLimiter(s.cfg.DefaultAlgo, rateLimit, window, maxTokens, refillRate)
+		}
+
+		return rate_limiter.NewTokenBucket(s.client, maxTokens, refillRate)
+	}
 }
