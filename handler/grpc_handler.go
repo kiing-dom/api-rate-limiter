@@ -21,8 +21,6 @@ func (g *GRPCRateLimiterServer) Check(
 	req *pb.RateLimitRequest,
 ) (*pb.RateLimitResponse, error) {
 
-	rl := g.store.GetRateLimiter(req.GetAlgo())
-
 	userID := req.GetUserId()
 	if userID == "" {
 		return &pb.RateLimitResponse{
@@ -30,6 +28,9 @@ func (g *GRPCRateLimiterServer) Check(
 			Message: "Missing userID (X-API-KEY)",
 		}, nil
 	}
+
+	algo := req.GetAlgo()
+	rl := g.store.GetRateLimiter(userID, algo)
 
 	if !rl.Allow(req.GetUserId()) {
 		return &pb.RateLimitResponse{

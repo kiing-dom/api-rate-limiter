@@ -18,7 +18,7 @@ func RateLimitHandler(s store.RLStore) http.HandlerFunc {
 		}
 
 		algo := r.URL.Query().Get("algo")
-		rl := s.GetRateLimiter(algo)
+		rl := s.GetRateLimiter(userID, algo)
 
 		if !rl.Allow(userID) {
 			log.Printf("Too Many Request by user: %s. Try again later", userID)
